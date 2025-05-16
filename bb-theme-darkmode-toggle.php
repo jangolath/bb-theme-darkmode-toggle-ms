@@ -3,7 +3,7 @@
  * Plugin Name: BuddyBoss Theme Dark Mode Toggle
  * Plugin URI: https://bluespringsweb.com
  * Description: Adds light/dark mode toggle for BuddyBoss users with integration for popular plugins
- * Version: 1.1.0
+ * Version: 1.1.1
  * Author: Jason Wood
  * Text Domain: bb-theme-darkmode-toggle
  * Domain Path: /languages
@@ -16,7 +16,7 @@ if (!defined('WPINC')) {
 }
 
 // Define plugin constants
-define('BB_THEME_DARKMODE_TOGGLE_VERSION', '1.1.0');
+define('BB_THEME_DARKMODE_TOGGLE_VERSION', '1.1.1');
 define('BB_THEME_DARKMODE_TOGGLE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('BB_THEME_DARKMODE_TOGGLE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('BB_THEME_DARKMODE_TOGGLE_NETWORK_WIDE', true); // Use network-wide preferences

@@ -176,12 +176,15 @@ class BB_Theme_Darkmode_Toggle {
      * Register plugin settings
      */
     public function register_settings() {
-        register_setting(
-            'bb_theme_darkmode_toggle_settings',
-            'bb_theme_darkmode_toggle_settings',
-            array($this, 'sanitize_settings')
-        );
-        
+        // For network admin, we'll handle saving manually
+        if (!is_network_admin()) {
+            register_setting(
+                'bb_theme_darkmode_toggle_settings',
+                'bb_theme_darkmode_toggle_settings',
+                array($this, 'sanitize_settings')
+            );
+        }
+
         // General Settings Section
         add_settings_section(
             'bb_theme_darkmode_toggle_general_section',
@@ -299,13 +302,13 @@ class BB_Theme_Darkmode_Toggle {
         $output = array();
         
         // General Settings
-        $output['enable_dark_mode'] = isset($input['enable_dark_mode']) ? 'yes' : 'no';
+        $output['enable_dark_mode'] = isset($input['enable_dark_mode']) && $input['enable_dark_mode'] === 'yes' ? 'yes' : 'no';
         
         // Plugin Integrations
         $output['plugin_integrations'] = array();
         
         foreach ($this->plugin_integrations as $plugin_key => $plugin_name) {
-            $output['plugin_integrations'][$plugin_key] = isset($input['plugin_integrations'][$plugin_key]) ? 'yes' : 'no';
+            $output['plugin_integrations'][$plugin_key] = isset($input['plugin_integrations'][$plugin_key]) && $input['plugin_integrations'][$plugin_key] === 'yes' ? 'yes' : 'no';
         }
         
         // BuddyBoss Colors
@@ -365,9 +368,7 @@ class BB_Theme_Darkmode_Toggle {
      * Enable dark mode callback
      */
     public function enable_dark_mode_callback() {
-        $options = get_option('bb_theme_darkmode_toggle_settings', array(
-            'enable_dark_mode' => 'yes'
-        ));
+        $options = $this->get_plugin_options();
         
         $checked = isset($options['enable_dark_mode']) && $options['enable_dark_mode'] === 'yes';
         
@@ -380,11 +381,7 @@ class BB_Theme_Darkmode_Toggle {
      */
     public function enable_plugin_integration_callback($args) {
         $plugin = $args['plugin'];
-        $options = get_option('bb_theme_darkmode_toggle_settings', array(
-            'plugin_integrations' => array(
-                $plugin => 'no'
-            )
-        ));
+        $options = $this->get_plugin_options();
         
         $checked = isset($options['plugin_integrations'][$plugin]) && $options['plugin_integrations'][$plugin] === 'yes';
         
@@ -396,7 +393,7 @@ class BB_Theme_Darkmode_Toggle {
      * BuddyBoss colors callback
      */
     public function buddyboss_colors_callback() {
-        $options = get_option('bb_theme_darkmode_toggle_settings', array());
+        $options = $this->get_plugin_options();
         $default_colors = array(
             'body_background_color' => '#222',
             'content_background_color' => '#333',
@@ -460,15 +457,29 @@ class BB_Theme_Darkmode_Toggle {
      * Display admin page
      */
     public function display_admin_page() {
+        // Handle form submission for network admin
+        if (is_network_admin() && isset($_POST['bb_theme_darkmode_toggle_settings'])) {
+            $this->save_network_settings();
+        }
+        
         if (isset($_GET['tab'])) {
             $this->active_tab = sanitize_text_field($_GET['tab']);
         } else {
             $this->active_tab = 'general';
         }
         
+        // Check for settings updated message
+        $updated = isset($_GET['settings-updated']) ? sanitize_text_field($_GET['settings-updated']) : '';
+        
         ?>
         <div class="wrap">
             <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
+            
+            <?php if ($updated === 'true' && !is_network_admin()): ?>
+            <div class="notice notice-success is-dismissible">
+                <p><?php _e('Settings saved.', 'bb-theme-darkmode-toggle'); ?></p>
+            </div>
+            <?php endif; ?>
             
             <h2 class="nav-tab-wrapper">
                 <a href="?page=<?php echo $_GET['page']; ?>&tab=general" class="nav-tab <?php echo $this->active_tab == 'general' ? 'nav-tab-active' : ''; ?>"><?php _e('General', 'bb-theme-toggle'); ?></a>
@@ -479,7 +490,14 @@ class BB_Theme_Darkmode_Toggle {
                 <a href="?page=<?php echo $_GET['page']; ?>&tab=dokan" class="nav-tab <?php echo $this->active_tab == 'dokan' ? 'nav-tab-active' : ''; ?>"><?php _e('Dokan', 'bb-theme-toggle'); ?></a>
             </h2>
             
+            <?php if (is_network_admin()): ?>
+            <!-- Network admin form submission -->
+            <form method="post" action="">
+            <?php else: ?>
+            <!-- Regular admin form submission -->
             <form method="post" action="options.php">
+            <?php endif; ?>
+                
                 <?php
                 settings_fields('bb_theme_darkmode_toggle_settings');
                 
@@ -505,15 +523,61 @@ class BB_Theme_Darkmode_Toggle {
     }
 
     /**
+     * Get plugin options
+     */
+    private function get_plugin_options() {
+        // If we're in a network, prioritize network options
+        if (is_multisite()) {
+            $network_options = get_site_option('bb_theme_darkmode_toggle_settings');
+            if (!empty($network_options)) {
+                return $network_options;
+            }
+        }
+        
+        // Fall back to regular site option
+        return get_option('bb_theme_darkmode_toggle_settings', array(
+            'enable_dark_mode' => 'yes',
+            'plugin_integrations' => array(
+                'buddyboss' => 'yes',
+                'better_messages' => 'no',
+                'tutor_lms' => 'no',
+                'events_calendar' => 'no',
+                'dokan' => 'no'
+            )
+        ));
+    }
+
+
+    /**
+     * Save network settings
+     */
+    public function save_network_settings() {
+        // Check nonce
+        check_admin_referer('bb_theme_darkmode_toggle_settings-options');
+        
+        // Get the submitted settings
+        $input = $_POST['bb_theme_darkmode_toggle_settings'];
+        
+        // Sanitize settings
+        $output = $this->sanitize_settings($input);
+        
+        // Save settings as a network option
+        update_site_option('bb_theme_darkmode_toggle_settings', $output);
+        
+        // Add success message
+        add_action('network_admin_notices', function() {
+            echo '<div class="notice notice-success is-dismissible"><p>' . __('Settings saved.', 'bb-theme-darkmode-toggle') . '</p></div>';
+        });
+    }
+
+    /**
      * Add theme settings to user profile
      */
     public function add_theme_settings_to_profile() {
         $user_id = bp_displayed_user_id();
         $theme_mode = get_user_meta($user_id, 'bb_theme_mode', true) ?: 'light';
         
-        $options = get_option('bb_theme_darkmode_toggle_settings', array(
-            'enable_dark_mode' => 'yes'
-        ));
+        $options = $this->get_plugin_options();
         
         ?>
         <div class="bb-theme-toggle-settings">
@@ -613,9 +677,7 @@ class BB_Theme_Darkmode_Toggle {
         $user_id = bp_displayed_user_id();
         $theme_mode = get_user_meta($user_id, 'bb_theme_mode', true) ?: 'light';
         
-        $options = get_option('bb_theme_darkmode_toggle_settings', array(
-            'enable_dark_mode' => 'yes'
-        ));
+        $options = $this->get_plugin_options();
         
         ?>
         <form action="<?php echo bp_displayed_user_domain() . bp_get_settings_slug() . '/theme-settings'; ?>" method="post" class="standard-form" id="theme-settings-form">
@@ -664,9 +726,7 @@ class BB_Theme_Darkmode_Toggle {
         );
         
         // Check if dark mode is enabled
-        $options = get_option('bb_theme_darkmode_toggle_settings', array(
-            'enable_dark_mode' => 'yes'
-        ));
+        $options = $this->get_plugin_options();
         
         if (!isset($options['enable_dark_mode']) || $options['enable_dark_mode'] !== 'yes') {
             return '';
@@ -862,7 +922,7 @@ class BB_Theme_Darkmode_Toggle {
             return;
         }
         
-        $options = get_option('bb_theme_darkmode_toggle_settings', array());
+        $options = $this->get_plugin_options();
         $default_colors = array(
             'body_background_color' => '#222',
             'content_background_color' => '#333',
