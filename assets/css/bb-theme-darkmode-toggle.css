@@ -4,18 +4,25 @@
 
 /* General Styles */
 .bb-theme-mode-dark {
-    --bb-background-color: #121212;
-    --bb-alternate-background-color: #1e1e1e;
-    --bb-body-text-color: #e0e0e0;
-    --bb-primary-text-color: #ffffff;
-    --bb-alternate-text-color: #aaaaaa;
-    --bb-content-background-color: #242424;
-    --bb-content-alternate-background-color: #2a2a2a;
-    --bb-content-border-color: #3a3a3a;
-    --bb-content-border-hover-color: #505050;
+    --bb-body-background-color: #222;
+    --bb-content-background-color: #333;
+    --bb-headings-color: #647385;
+    --bb-primary-color: #647385;
+    --bb-body-text-color: #f2f2f2;
+    --bb-content-border-color: #555759;
+    --bb-header-background: #1c252b;
+    --bb-footer-background: #1c252b;
+    
+    /* Compatibility variables */
+    --bb-background-color: var(--bb-body-background-color);
+    --bb-alternate-background-color: var(--bb-content-background-color);
+    --bb-primary-text-color: var(--bb-headings-color);
+    --bb-alternate-text-color: var(--bb-body-text-color);
+    --bb-content-alternate-background-color: var(--bb-content-background-color);
+    --bb-content-border-hover-color: var(--bb-content-border-color);
 }
 
-/* Profile Settings Page Styles */
+/* Theme Settings Page Styles */
 .bb-theme-toggle-settings {
     margin-bottom: 20px;
     padding: 15px;
@@ -24,63 +31,27 @@
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-.bb-theme-mode-toggle,
-.bb-profile-frame-select {
+.bb-theme-mode-toggle {
     margin-bottom: 20px;
 }
 
-.bb-theme-mode-toggle label,
-.bb-profile-frame-select label {
+.bb-theme-mode-toggle label {
     display: block;
     font-weight: bold;
     margin-bottom: 10px;
 }
 
-.theme-mode-options,
-.profile-frame-options {
+.theme-mode-options {
     display: flex;
     flex-wrap: wrap;
     gap: 15px;
 }
 
-.theme-mode-options label,
-.profile-frame-options label {
+.theme-mode-options label {
     display: flex;
     align-items: center;
     font-weight: normal;
     cursor: pointer;
-}
-
-.frame-preview {
-    display: inline-block;
-    margin-left: 5px;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    overflow: hidden;
-    position: relative;
-    background-color: #f0f0f0;
-}
-
-/* Frame styles */
-.frame-1 img {
-    border: 3px solid var(--bb-primary-color, #385DFF);
-    padding: 2px;
-    border-radius: 50%;
-}
-
-.frame-2 img {
-    border: 2px solid #fff;
-    box-shadow: 0 0 0 3px var(--bb-primary-color, #385DFF);
-    padding: 2px;
-    border-radius: 50%;
-}
-
-.frame-3 img {
-    border: 3px solid gold;
-    padding: 2px;
-    border-radius: 50%;
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
 }
 
 /* Floating toggle button */
@@ -245,109 +216,6 @@ input:checked + .slider:before {
     border-color: var(--bb-primary-color, #385DFF);
 }
 
-/* Profile Frame Shortcode */
-.bb-profile-frame-shortcode {
-    margin: 15px 0;
-}
-
-.bb-profile-frame-shortcode .frame-label {
-    display: block;
-    margin-bottom: 10px;
-    font-weight: 500;
-}
-
-/* Select Style */
-.frame-select {
-    width: 100%;
-    max-width: 300px;
-    padding: 8px 10px;
-    border-radius: 4px;
-    border: 1px solid #ddd;
-    background-color: white;
-}
-
-/* Radio Style */
-.frame-radio-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    margin-bottom: 15px;
-}
-
-.frame-radio-label {
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
-}
-
-.frame-radio-label input {
-    margin: 0;
-}
-
-.frame-radio-label .frame-preview {
-    width: 50px;
-    height: 50px;
-}
-
-/* Buttons Style */
-.frame-buttons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 15px;
-}
-
-.frame-btn {
-    background-color: transparent;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    padding: 8px 15px;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
-    transition: all 0.2s ease;
-}
-
-.frame-btn:hover {
-    background-color: #f7f7f7;
-}
-
-.frame-btn.active {
-    background-color: var(--bb-primary-color, #385DFF);
-    color: white;
-    border-color: var(--bb-primary-color, #385DFF);
-}
-
-.frame-btn .frame-preview {
-    width: 40px;
-    height: 40px;
-    background-color: #ccc;
-    border-radius: 50%;
-}
-
-/* Frame Preview Container */
-.frame-preview-container {
-    display: flex;
-    justify-content: center;
-    margin-top: 20px;
-}
-
-.frame-preview-avatar {
-    width: 100px;
-    height: 100px;
-    position: relative;
-}
-
-.frame-preview-avatar img {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-}
-
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .bb-theme-toggle-shortcode {
@@ -366,10 +234,6 @@ input:checked + .slider:before {
     
     .theme-btn {
         flex: 1;
-        justify-content: center;
-    }
-    
-    .frame-buttons {
         justify-content: center;
     }
 }

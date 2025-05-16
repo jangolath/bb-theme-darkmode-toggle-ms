@@ -2,10 +2,9 @@
 /**
  * Plugin Name: BuddyBoss Theme Dark Mode Toggle
  * Plugin URI: https://bluespringsweb.com
- * Description: Adds light/dark mode toggle and profile frame options for BuddyBoss users
- * Version: 1.0.2
+ * Description: Adds light/dark mode toggle for BuddyBoss users with integration for popular plugins
+ * Version: 1.1.0
  * Author: Jason Wood
- * Author URI: https://bluespringsweb.com
  * Text Domain: bb-theme-darkmode-toggle
  * Domain Path: /languages
  * License: GPL v2 or later
@@ -17,7 +16,7 @@ if (!defined('WPINC')) {
 }
 
 // Define plugin constants
-define('BB_THEME_DARKMODE_TOGGLE_VERSION', '1.0.2');
+define('BB_THEME_DARKMODE_TOGGLE_VERSION', '1.1.0');
 define('BB_THEME_DARKMODE_TOGGLE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('BB_THEME_DARKMODE_TOGGLE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('BB_THEME_DARKMODE_TOGGLE_NETWORK_WIDE', true); // Use network-wide preferences
@@ -49,18 +48,28 @@ function bb_theme_darkmode_toggle_admin_notice() {
 
 // Activation hook
 function bb_theme_darkmode_toggle_activate() {
-    // Create database tables if needed
-    global $wpdb;
+    // Default settings for the plugin
+    $default_options = array(
+        'enable_dark_mode' => 'yes',
+        'plugin_integrations' => array(
+            'buddyboss' => 'yes',
+            'better_messages' => 'no',
+            'tutor_lms' => 'no',
+            'events_calendar' => 'no',
+            'dokan' => 'no'
+        )
+    );
     
-    $charset_collate = $wpdb->get_charset_collate();
-    
-    // We'll use user meta instead of custom tables
-    // But you can add custom tables here if needed
+    // Add default options if they don't exist
+    if (!get_option('bb_theme_darkmode_toggle_settings')) {
+        add_option('bb_theme_darkmode_toggle_settings', $default_options);
+    }
 }
 register_activation_hook(__FILE__, 'bb_theme_darkmode_toggle_activate');
 
 // Deactivation hook
 function bb_theme_darkmode_toggle_deactivate() {
     // Cleanup when plugin is deactivated
+    // We're keeping the settings in case the plugin is reactivated
 }
 register_deactivation_hook(__FILE__, 'bb_theme_darkmode_toggle_deactivate');
