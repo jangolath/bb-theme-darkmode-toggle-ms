@@ -106,16 +106,22 @@ class BB_Theme_Darkmode_Toggle {
 
             // Pass data to JavaScript
             $user_id = get_current_user_id();
+            $options = $this->get_plugin_options();
             
             // Use network-wide user meta keys (no blog ID in the key)
             $theme_mode = get_user_meta($user_id, 'bb_theme_mode', true) ?: 'light';
+            $is_logged_in = is_user_logged_in();
+            $floating_toggle_visibility = isset($options['floating_toggle_visibility']) ? 
+                $options['floating_toggle_visibility'] : 'all_users';
             
             wp_localize_script('bb-theme-toggle-js', 'bbThemeToggle', array(
                 'ajaxUrl' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce('bb-theme-toggle-nonce'),
                 'userId' => $user_id,
                 'themeMode' => $theme_mode,
-                'networkWide' => true // Flag indicating network-wide preferences
+                'networkWide' => true, // Flag indicating network-wide preferences
+                'isLoggedIn' => $is_logged_in,
+                'floatingToggleVisibility' => $floating_toggle_visibility
             ));
         }
     }
@@ -197,6 +203,14 @@ class BB_Theme_Darkmode_Toggle {
             'enable_dark_mode',
             __('Enable Dark Mode', 'bb-theme-toggle'),
             array($this, 'enable_dark_mode_callback'),
+            'bb_theme_darkmode_toggle_general',
+            'bb_theme_darkmode_toggle_general_section'
+        );
+
+        add_settings_field(
+            'floating_toggle_visibility',
+            __('Floating Toggle Visibility', 'bb-theme-toggle'),
+            array($this, 'floating_toggle_visibility_callback'),
             'bb_theme_darkmode_toggle_general',
             'bb_theme_darkmode_toggle_general_section'
         );
@@ -303,7 +317,10 @@ class BB_Theme_Darkmode_Toggle {
         
         // General Settings
         $output['enable_dark_mode'] = isset($input['enable_dark_mode']) && $input['enable_dark_mode'] === 'yes' ? 'yes' : 'no';
-        
+        // Floating toggle visibility
+        $output['floating_toggle_visibility'] = isset($input['floating_toggle_visibility']) ? 
+            sanitize_text_field($input['floating_toggle_visibility']) : 'all_users';
+
         // Plugin Integrations
         $output['plugin_integrations'] = array();
         
@@ -633,6 +650,25 @@ class BB_Theme_Darkmode_Toggle {
         }
         
         return $classes;
+    }
+
+    /**
+     * Floating toggle visibility callback
+     */
+    public function floating_toggle_visibility_callback() {
+        $options = $this->get_plugin_options();
+        
+        $visibility = isset($options['floating_toggle_visibility']) ? $options['floating_toggle_visibility'] : 'all_users';
+        
+        ?>
+        <select name="bb_theme_darkmode_toggle_settings[floating_toggle_visibility]" id="floating_toggle_visibility">
+            <option value="all_users" <?php selected('all_users', $visibility); ?>><?php _e('Show to all users', 'bb-theme-toggle'); ?></option>
+            <option value="visitors_only" <?php selected('visitors_only', $visibility); ?>><?php _e('Show to non-logged-in users only', 'bb-theme-toggle'); ?></option>
+            <option value="logged_in_only" <?php selected('logged_in_only', $visibility); ?>><?php _e('Show to logged-in users only', 'bb-theme-toggle'); ?></option>
+            <option value="hidden" <?php selected('hidden', $visibility); ?>><?php _e('Hide for everyone', 'bb-theme-toggle'); ?></option>
+        </select>
+        <p class="description"><?php _e('Control who can see the floating theme toggle button in the bottom-right corner.', 'bb-theme-toggle'); ?></p>
+        <?php
     }
 
     /**

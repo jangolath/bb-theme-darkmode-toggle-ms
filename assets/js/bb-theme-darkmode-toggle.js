@@ -18,7 +18,15 @@
          * Apply theme mode based on user preference
          */
         applyThemeMode: function() {
-            const themeMode = bbThemeToggle.themeMode || 'light';
+            // For non-logged-in users, check localStorage
+            let themeMode = bbThemeToggle.themeMode || 'light';
+            
+            if (!bbThemeToggle.userId) {
+                const storedMode = localStorage.getItem('bb_theme_mode');
+                if (storedMode) {
+                    themeMode = storedMode;
+                }
+            }
             
             // Remove existing classes
             $('body').removeClass('bb-theme-mode-light bb-theme-mode-dark');
@@ -77,6 +85,15 @@
          * Initialize floating toggle
          */
         initFloatingToggle: function() {
+            // Check if floating toggle should be visible based on user login status
+            const shouldShowFloatingToggle = this.shouldShowFloatingToggle();
+            
+            if (!shouldShowFloatingToggle) {
+                // Remove existing toggle if it exists and shouldn't be shown
+                $('.bb-floating-theme-toggle').remove();
+                return;
+            }
+            
             // Only add if not already present
             if ($('.bb-floating-theme-toggle').length === 0) {
                 const currentMode = bbThemeToggle.themeMode || 'light';
@@ -93,8 +110,13 @@
                 $toggle.on('click', function() {
                     const newMode = bbThemeToggle.themeMode === 'dark' ? 'light' : 'dark';
                     
-                    // Update user preference via AJAX
-                    BBThemeToggle.updateUserPreference('theme_mode', newMode);
+                    // Update user preference via AJAX if logged in
+                    if (bbThemeToggle.userId) {
+                        BBThemeToggle.updateUserPreference('theme_mode', newMode);
+                    } else {
+                        // For non-logged-in users, just store in localStorage
+                        localStorage.setItem('bb_theme_mode', newMode);
+                    }
                     
                     // Apply changes immediately
                     bbThemeToggle.themeMode = newMode;
@@ -103,6 +125,26 @@
                     // Update toggle icon
                     $(this).html(newMode === 'light' ? '🌙' : '☀️');
                 });
+            }
+        },
+
+        /**
+         * Determine if floating toggle should be shown based on settings and login status
+         */
+        shouldShowFloatingToggle: function() {
+            const visibility = bbThemeToggle.floatingToggleVisibility || 'all_users';
+            const isLoggedIn = bbThemeToggle.isLoggedIn || false;
+            
+            switch (visibility) {
+                case 'visitors_only':
+                    return !isLoggedIn;
+                case 'logged_in_only':
+                    return isLoggedIn;
+                case 'hidden':
+                    return false;
+                case 'all_users':
+                default:
+                    return true;
             }
         },
 
