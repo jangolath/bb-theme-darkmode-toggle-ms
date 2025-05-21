@@ -152,12 +152,33 @@ class BB_Theme_Darkmode_Toggle {
     }
 
     /**
-     * Add admin menu item
+     * Add admin menu item under BAE
      */
     public function add_admin_menu() {
-        add_options_page(
-            __('BuddyBoss Theme Darkmode Toggle', 'bb-theme-darkmode-toggle'),
-            __('BB Theme Darkmode Toggle', 'bb-theme-darkmode-toggle'),
+        // Make sure the parent BAE menu exists (or create it)
+        if (!menu_page_url('buddyboss-advanced-enhancements', false)) {
+            // Create parent menu if it doesn't exist
+            add_menu_page(
+                __('BuddyBoss Advanced Enhancements', 'bb-theme-darkmode-toggle'),
+                __('BB Advanced', 'bb-theme-darkmode-toggle'),
+                'manage_options',
+                'buddyboss-advanced-enhancements',
+                function() {
+                    echo '<div class="wrap">';
+                    echo '<h1>' . __('BuddyBoss Advanced Enhancements', 'bb-theme-darkmode-toggle') . '</h1>';
+                    echo '<p>' . __('Welcome to BuddyBoss Advanced Enhancements. Use the submenu to access specific features.', 'bb-theme-darkmode-toggle') . '</p>';
+                    echo '</div>';
+                },
+                'dashicons-buddicons-buddypress-logo',
+                3
+            );
+        }
+        
+        // Add this plugin as a submenu
+        add_submenu_page(
+            'buddyboss-advanced-enhancements',  // Parent slug
+            __('Theme Dark Mode Toggle', 'bb-theme-darkmode-toggle'),
+            __('Dark Mode Toggle', 'bb-theme-darkmode-toggle'),
             'manage_options',
             'bb-theme-darkmode-toggle',
             array($this, 'display_admin_page')
@@ -165,13 +186,33 @@ class BB_Theme_Darkmode_Toggle {
     }
     
     /**
-     * Add network admin menu item
+     * Add network admin menu item under BAE
      */
     public function add_network_admin_menu() {
+        // Make sure the parent BAE menu exists (or create it)
+        if (!menu_page_url('buddyboss-advanced-enhancements', false)) {
+            // Create parent menu if it doesn't exist
+            add_menu_page(
+                __('BuddyBoss Advanced Enhancements', 'bb-theme-darkmode-toggle'),
+                __('BB Advanced', 'bb-theme-darkmode-toggle'),
+                'manage_network_options',
+                'buddyboss-advanced-enhancements',
+                function() {
+                    echo '<div class="wrap">';
+                    echo '<h1>' . __('BuddyBoss Advanced Enhancements', 'bb-theme-darkmode-toggle') . '</h1>';
+                    echo '<p>' . __('Welcome to BuddyBoss Advanced Enhancements. Use the submenu to access specific features.', 'bb-theme-darkmode-toggle') . '</p>';
+                    echo '</div>';
+                },
+                'dashicons-buddicons-buddypress-logo',
+                3
+            );
+        }
+        
+        // Add this plugin as a submenu
         add_submenu_page(
-            'settings.php',
-            __('BuddyBoss Theme Darkmode Toggle', 'bb-theme-darkmode-toggle'),
-            __('BB Theme Darkmode Toggle', 'bb-theme-darkmode-toggle'),
+            'buddyboss-advanced-enhancements',  // Parent slug
+            __('Theme Dark Mode Toggle', 'bb-theme-darkmode-toggle'),
+            __('Dark Mode Toggle', 'bb-theme-darkmode-toggle'),
             'manage_network_options',
             'bb-theme-darkmode-toggle-network',
             array($this, 'display_admin_page')
@@ -499,12 +540,12 @@ class BB_Theme_Darkmode_Toggle {
             <?php endif; ?>
             
             <h2 class="nav-tab-wrapper">
-                <a href="?page=<?php echo $_GET['page']; ?>&tab=general" class="nav-tab <?php echo $this->active_tab == 'general' ? 'nav-tab-active' : ''; ?>"><?php _e('General', 'bb-theme-toggle'); ?></a>
-                <a href="?page=<?php echo $_GET['page']; ?>&tab=buddyboss" class="nav-tab <?php echo $this->active_tab == 'buddyboss' ? 'nav-tab-active' : ''; ?>"><?php _e('BuddyBoss', 'bb-theme-toggle'); ?></a>
-                <a href="?page=<?php echo $_GET['page']; ?>&tab=better_messages" class="nav-tab <?php echo $this->active_tab == 'better_messages' ? 'nav-tab-active' : ''; ?>"><?php _e('Better Messages', 'bb-theme-toggle'); ?></a>
-                <a href="?page=<?php echo $_GET['page']; ?>&tab=tutor_lms" class="nav-tab <?php echo $this->active_tab == 'tutor_lms' ? 'nav-tab-active' : ''; ?>"><?php _e('Tutor LMS', 'bb-theme-toggle'); ?></a>
-                <a href="?page=<?php echo $_GET['page']; ?>&tab=events_calendar" class="nav-tab <?php echo $this->active_tab == 'events_calendar' ? 'nav-tab-active' : ''; ?>"><?php _e('The Events Calendar', 'bb-theme-toggle'); ?></a>
-                <a href="?page=<?php echo $_GET['page']; ?>&tab=dokan" class="nav-tab <?php echo $this->active_tab == 'dokan' ? 'nav-tab-active' : ''; ?>"><?php _e('Dokan', 'bb-theme-toggle'); ?></a>
+                <a href="?page=<?php echo esc_attr($_GET['page']); ?>&tab=general" class="nav-tab <?php echo $this->active_tab == 'general' ? 'nav-tab-active' : ''; ?>"><?php _e('General', 'bb-theme-toggle'); ?></a>
+                <a href="?page=<?php echo esc_attr($_GET['page']); ?>&tab=buddyboss" class="nav-tab <?php echo $this->active_tab == 'buddyboss' ? 'nav-tab-active' : ''; ?>"><?php _e('BuddyBoss', 'bb-theme-toggle'); ?></a>
+                <a href="?page=<?php echo esc_attr($_GET['page']); ?>&tab=better_messages" class="nav-tab <?php echo $this->active_tab == 'better_messages' ? 'nav-tab-active' : ''; ?>"><?php _e('Better Messages', 'bb-theme-toggle'); ?></a>
+                <a href="?page=<?php echo esc_attr($_GET['page']); ?>&tab=tutor_lms" class="nav-tab <?php echo $this->active_tab == 'tutor_lms' ? 'nav-tab-active' : ''; ?>"><?php _e('Tutor LMS', 'bb-theme-toggle'); ?></a>
+                <a href="?page=<?php echo esc_attr($_GET['page']); ?>&tab=events_calendar" class="nav-tab <?php echo $this->active_tab == 'events_calendar' ? 'nav-tab-active' : ''; ?>"><?php _e('The Events Calendar', 'bb-theme-toggle'); ?></a>
+                <a href="?page=<?php echo esc_attr($_GET['page']); ?>&tab=dokan" class="nav-tab <?php echo $this->active_tab == 'dokan' ? 'nav-tab-active' : ''; ?>"><?php _e('Dokan', 'bb-theme-toggle'); ?></a>
             </h2>
             
             <?php if (is_network_admin()): ?>
